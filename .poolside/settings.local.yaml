@@ -1,0 +1,22 @@
+tools:
+    shell:
+        allow:
+            - ls *
+            - find *
+            - which pdftotext *
+            - python3 *
+            - echo *
+            - cd *
+            - pdftotext *
+            - wc *
+            - cat *
+            - php *
+            - grep *
+            - which composer
+            - head *
+            - mkdir *
+            - sort
+            - timeout 30 composer init *
+            - tail *
+            - timeout 60 composer require *
+            - timeout 10 curl *

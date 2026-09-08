@@ -1,0 +1,6 @@
+{
+    "name": "deuna/sistema",
+    "description": "DeUna - Sistema de recepción, custodia y entrega de paquetes",
+    "type": "project",
+    "require": {}
+}

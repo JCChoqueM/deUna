@@ -1,0 +1,511 @@
+                                                                                        DeUna | Especificación de Requerimientos de Software
+
+
+
+                                               DEUNA
+        Especificación de Requerimientos de Software
+                      Sistema de recepción, custodia y entrega de paquetes
+
+Propósito del documento
+Definir de forma clara y verificable el alcance funcional y técnico de una aplicación de escritorio/web para
+gestionar paquetes que los vendedores dejan en un punto DeUna y que posteriormente son retirados por sus
+compradores.
+
+Campo                    Detalle
+Documento                Especificación de Requerimientos de Software (SRS)
+Versión                  1.0
+Fecha                    8 de septiembre de 2026
+Producto                 DeUna – Gestión de Paquetería y Punto de Entrega
+Audiencia                Propietario del negocio, analista, equipo UX/UI, desarrollo, QA y soporte
+
+
+
+
+                                 Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                                DeUna | Especificación de Requerimientos de Software
+
+1. Resumen ejecutivo
+DeUna será un sistema para registrar, identificar, custodiar y entregar paquetes en un punto de recepción. El flujo
+principal empieza cuando un vendedor entrega un paquete; el operador registra la información, el sistema genera un
+código de retiro y un código QR, y el vendedor puede comunicar estos datos a su comprador. Posteriormente, el
+comprador se presenta en el punto DeUna, se valida el código/QR, se registra el pago correspondiente y el paquete
+pasa a estado «Entregado».
+    Principio de diseño
+    El sistema debe minimizar el tiempo de atención en mostrador y reducir errores de identificación. El paquete debe
+    poder localizarse por código, QR, nombre del comprador, celular del vendedor o estado.
+
+
+
+
+2. Objetivos del sistema
+      Centralizar el registro de todos los paquetes recibidos por DeUna.
+      Asignar a cada paquete un identificador único, fácil de comunicar y fácil de visualizar físicamente.
+      Generar automáticamente un código QR asociado al paquete para facilitar el retiro.
+      Permitir que el operador consulte y filtre paquetes pendientes o entregados.
+      Controlar el plazo de permanencia de 7 días y calcular una comisión adicional cuando corresponda.
+      Registrar la entrega y el pago realizado por el comprador al momento del retiro.
+      Mantener trazabilidad de quién recibió el paquete, cuándo se recibió y cuándo fue entregado.
+      Facilitar reportes básicos de operación y conciliación de caja.
+
+
+
+3. Alcance
+    Incluido en el alcance                                                  No incluido en esta primera versión
+    Registro de vendedores y compradores asociados a paquetes               Gestión avanzada de rutas de reparto a domicilio
+    Registro de paquetes y persona autorizada para recoger                  Marketplace o catálogo de productos
+    Generación de código M-# y QR                                           Gestión de inventario de los productos vendidos por el vendedor
+                                                                            Integración obligatoria con pasarelas bancarias; se deja preparada
+    Consulta, búsqueda y filtros
+                                                                            como extensión
+    Recepción, custodia y entrega                                           Facturación electrónica, salvo que se solicite posteriormente
+    Cálculo de comisión por permanencia > 7 días                            Logística de última milla fuera del punto de entrega
+    Registro de pagos y estado                                              App móvil nativa del comprador, opcional como fase futura
+
+
+
+
+4. Actores y perfiles de usuario
+    Actor                           Descripción                                                  Permisos principales
+                                                                                                 Usuarios, tarifas, reglas de comisión, reportes,
+    Administrador                   Responsable de configurar y supervisar el sistema.
+                                                                                                 configuración general.
+                                    Persona que recibe y entrega paquetes en el punto            Registrar recepción, generar QR, consultar,
+    Operador
+                                    DeUna.                                                       registrar pagos y entregar.
+                                                                                                 Sus datos se registran; opcionalmente puede
+    Vendedor                        Entrega paquetes para sus compradores.                       consultar sus paquetes mediante un módulo
+                                                                                                 futuro.
+    Comprador / persona                                                                          Presentar QR/código, validar identidad/datos
+                                    Persona que acude a recoger el paquete.
+    autorizada                                                                                   registrados y realizar el pago.
+
+
+
+
+                                         Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                         DeUna | Especificación de Requerimientos de Software
+
+5. Flujo operativo principal
+1. Recepción: El vendedor llega al punto DeUna con uno o varios paquetes.
+2. Registro: El operador crea un registro por paquete e introduce los datos obligatorios.
+3. Identificación: El sistema asigna un número correlativo a la lista y construye el código visible: inicial del nombre
+del comprador + número. Ejemplo: «M-8».
+4. QR: El sistema genera un QR único que codifica un identificador seguro del paquete y abre una ficha de
+consulta/validación.
+5. Entrega de información: El operador entrega o comparte el QR/código al vendedor para que este lo envíe al
+comprador.
+6. Custodia: El paquete queda con estado «Pendiente». El sistema calcula automáticamente los días transcurridos.
+7. Retiro: El comprador se presenta, proporciona el QR o código y el operador verifica la coincidencia con el
+registro.
+8. Cobro: El sistema calcula el importe a pagar, incluyendo la comisión por atraso cuando corresponda.
+9. Entrega: Una vez validado el pago y la persona autorizada, el operador marca el paquete como «Entregado» y
+registra fecha/hora de entrega.
+10. Trazabilidad: El sistema conserva el historial de la operación para consultas y reportes.
+
+
+
+
+                                  Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                        DeUna | Especificación de Requerimientos de Software
+
+6. Requerimientos funcionales
+ID      Función                              Requisito
+                                             El sistema deberá permitir acceso mediante usuario y contraseña, con perfiles
+RF-01   Autenticación de usuarios
+                                             Administrador y Operador.
+                                             Deberá registrar como mínimo nombre o identificación del vendedor y celular del
+RF-02   Registro de vendedor
+                                             vendedor. El registro podrá ser reutilizado en futuros paquetes.
+                                             Deberá registrar nombre completo del comprador y, como recomendación operativa,
+RF-03   Registro de comprador
+                                             celular del comprador.
+                                             Deberá registrar los datos de la persona autorizada para recoger el paquete. Como mínimo:
+RF-04   Persona que recogerá                 nombre completo y celular. Si no coincide con el comprador, debe indicarse que es un
+                                             tercero autorizado.
+                                             Cada paquete deberá tener un registro único. Debe incluir fecha/hora de recepción,
+RF-05   Registro de paquete
+                                             vendedor asociado, comprador asociado y estado.
+                                             El sistema deberá generar un número de lista correlativo por paquete o por jornada, según
+RF-06   Numeración correlativa
+                                             la configuración elegida. Este comportamiento debe ser configurable.
+                                             Debe generarse automáticamente un código con formato «I-N», donde I es la inicial del
+RF-07   Código visible                       nombre del comprador y N es el número asignado. Ejemplo: «M-8». El código debe ser
+                                             único dentro del universo operativo definido.
+                                             Debe generarse automáticamente un QR por paquete. El QR no deberá contener
+RF-08   Código QR                            directamente datos personales; debe almacenar un identificador seguro o un token que
+                                             permita recuperar el registro.
+                                             El sistema deberá permitir imprimir o descargar una etiqueta/comprobante con el código
+RF-09   Impresión / descarga
+                                             M-N y QR.
+                                             El operador deberá poder ingresar manualmente un código como «M-8» y consultar el
+RF-10   Consulta por código
+                                             paquete correspondiente.
+                                             El operador deberá poder escanear un QR usando una cámara conectada al equipo o un
+RF-11   Consulta por QR
+                                             dispositivo compatible.
+                                             Se deberá poder buscar por nombre del comprador, celular del vendedor, número/código,
+RF-12   Búsqueda avanzada
+                                             rango de fechas y estado.
+                                             El paquete deberá manejar como mínimo los estados «Pendiente» y «Entregado». Se
+RF-13   Estados                              recomienda agregar «Anulado» o «Incidencia» para casos excepcionales, sin afectar el
+                                             requisito mínimo.
+                                             El sistema deberá calcular los días transcurridos desde la fecha/hora de recepción. Al
+RF-14   Control de 7 días
+                                             superar 7 días, el paquete deberá marcarse como sujeto a comisión adicional.
+                                             La comisión adicional deberá ser configurable por el administrador. Debe poder definirse
+RF-15   Cálculo de comisión                  como monto fijo por paquete o como porcentaje, preferiblemente dejando seleccionado un
+                                             único método por configuración.
+                                             En el momento de la entrega, el operador deberá registrar el monto base, la comisión por
+RF-16   Pago en retiro
+                                             atraso (si corresponde), el total cobrado y el medio de pago.
+                                             El sistema no deberá permitir pasar a «Entregado» sin registrar la persona que retira,
+RF-17   Validación de entrega                fecha/hora y operador responsable. Se recomienda asociar además un comprobante o firma
+                                             digital opcional.
+RF-18   Historial                            Cada cambio relevante deberá quedar registrado con fecha/hora y usuario que lo realizó.
+                                             El sistema deberá generar reportes de paquetes pendientes, entregados, vencidos, ingresos
+RF-19   Reportes
+                                             por cobros y comisiones.
+                                             El administrador deberá poder configurar tarifa base del servicio, comisión por atraso,
+RF-20   Configuración
+                                             duración del plazo (7 días por defecto), numeración y datos del negocio.
+
+
+
+
+                                 Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                               DeUna | Especificación de Requerimientos de Software
+
+7. Modelo de datos propuesto
+ Entidad                 Campos principales                                                                   Observaciones
+                                                                                                              Contraseña siempre almacenada
+ Usuario                 id, nombre, usuario, contraseña_hash, rol, estado, fecha_creación
+                                                                                                              como hash; nunca en texto plano.
+                                                                                                              Puede reutilizarse en múltiples
+ Vendedor                id, nombre, celular, observaciones, fecha_registro
+                                                                                                              paquetes.
+                                                                                                              Se recomienda celular para
+ Comprador               id, nombre_completo, celular, observaciones
+                                                                                                              notificaciones o validación futura.
+                                                                                                              Puede ser el propio comprador o un
+ Autorizado              id, nombre_completo, celular, relación_con_comprador
+                                                                                                              tercero.
+                         id, número_lista, código_visible, qr_token, vendedor_id, comprador_id,
+ Paquete                 autorizado_id, fecha_recepción, fecha_vencimiento, estado, ubicación,                Entidad central del sistema.
+                         observaciones
+                         id, paquete_id, monto_base, comisión_atraso, total, medio_pago,
+ Pago                                                                                                         Permite conciliación y reportes.
+                         fecha_hora, usuario_id, referencia
+                         id, paquete_id, acción, estado_anterior, estado_nuevo, fecha_hora,
+ Historial                                                                                                    Auditoría.
+                         usuario_id, detalle
+ Configuración           clave, valor, fecha_actualización, usuario_id                                        Tarifas y parámetros generales.
+
+
+
+7.1. Datos obligatorios al recibir un paquete
+ Dato                                            Obligatorio               Formato / regla
+ Nombre completo del comprador                   Sí                        Texto; no debería quedar vacío.
+ Celular del vendedor                            Sí                        Teléfono válido según reglas configuradas para el país.
+ Fecha y hora de recepción                       Sí                        Generada automáticamente por el sistema.
+ Persona autorizada para recoger                 Sí                        Nombre completo; celular recomendado.
+ Nombre del vendedor                             Sí                        Puede seleccionarse de un registro existente.
+ Descripción del paquete                         Recomendado               Descripción breve para identificación física.
+                                                 Recomendado /             Monto que debe pagar el comprador por el servicio, según política
+ Importe base a cobrar
+                                                 configurable              comercial.
+ Observaciones                                   Opcional                  Incidencias o notas operativas.
+
+
+
+
+8. Diseño de identificación: código y QR
+Se utilizarán dos mecanismos complementarios: un código corto y humano para comunicación rápida, y un QR para
+escaneo y reducción de errores.
+ Elemento                        Ejemplo                             Regla
+ Número de lista                 8                                   Generado automáticamente.
+ Código visible                  M-8                                 Inicial del nombre del comprador + guion + número.
+                                                                     Contiene un token/ID seguro; no se recomienda codificar nombre y
+ QR                              Imagen QR
+                                                                     teléfonos directamente.
+ ID interno                      PK-2026-000008                      Identificador único de base de datos, no necesariamente visible al público.
+
+
+ Regla recomendada para el código
+ La inicial debe normalizarse a mayúscula, quitar espacios y considerar caracteres especiales. Ejemplo: «María
+ Cáceres» → «M-8». Si dos o más paquetes reciben el mismo número, el identificador interno y el QR deben seguir
+ siendo inequívocos.
+
+
+
+
+9. Regla de permanencia de 7 días
+Para evitar interpretaciones diferentes, se propone que el plazo se calcule desde la fecha y hora exactas de recepción.
+ Escenario                                                        Resultado
+ Retiro dentro de los primeros 7 días                             Se cobra tarifa base, sin comisión de atraso.
+
+                                        Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                              DeUna | Especificación de Requerimientos de Software
+ Retiro después de cumplidos 7 días                              Se agrega comisión de atraso configurada.
+                                                                 Debe considerarse dentro del plazo hasta que se supere el instante
+ Paquete pendiente exactamente en el día 7
+                                                                 configurado de 7 × 24 horas.
+                                                                 Se recomienda usar 7 × 24 horas para evitar ambigüedad. Esta regla puede
+ Día calendario vs. 7 × 24 horas
+                                                                 cambiarse a días calendario mediante configuración.
+
+
+Ejemplo: si el paquete se recibe el 1 de septiembre a las 15:30, el plazo de 7 × 24 horas concluye el 8 de septiembre a
+las 15:30. A partir de entonces, la comisión por atraso aplica al retiro.
+
+
+
+10. Flujo de entrega al comprador
+1.   El comprador muestra el QR recibido o comunica el código, por ejemplo «M-8».
+2.   El operador localiza el registro y verifica que el paquete esté en estado «Pendiente».
+3.   El sistema muestra comprador, persona autorizada, fecha de recepción, días transcurridos y monto a pagar.
+4.   El operador verifica que quien retira coincida con la persona registrada o registra una autorización excepcional
+     según política de DeUna.
+5.   El sistema calcula el total: tarifa base + comisión de atraso, si corresponde.
+6.   El operador registra el pago y su medio de pago.
+7.   El operador confirma la entrega. El estado cambia a «Entregado».
+8.   El sistema registra fecha/hora, usuario operador y, opcionalmente, evidencia de entrega.
+
+
+
+
+                                       Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                           DeUna | Especificación de Requerimientos de Software
+
+11. Pantallas propuestas
+    Pantalla                         Contenido mínimo
+    Inicio de sesión                 Usuario, contraseña, recuperación/gestión de acceso según política.
+    Dashboard                        Paquetes pendientes, entregados, atrasados, monto cobrado del día, accesos rápidos.
+    Nuevo paquete                    Formulario de vendedor, comprador, persona autorizada, datos del paquete y tarifa.
+    Confirmación de recepción        Resumen, código M-8, QR, opción imprimir/descargar/compartir.
+    Listado de paquetes              Tabla con código, comprador, vendedor, fecha, días, estado, importe y acciones.
+    Detalle del paquete              Toda la información, historial, pagos, estado, ubicación y controles de entrega.
+    Entrega rápida                   Campo para escanear QR o ingresar código; vista resumida para atención en mostrador.
+    Registrar pago                   Monto base, comisión, total, medio de pago, referencia y confirmación.
+    Reportes                         Filtros por fecha/estado/vendedor; exportación CSV/XLSX/PDF como mejora recomendada.
+    Configuración                    Tarifas, comisión, plazo, numeración, usuarios, datos del negocio y parámetros.
+
+
+
+11.1. Experiencia de uso recomendada
+      El registro de un paquete debe poder completarse en pocos pasos y con campos agrupados por persona y paquete.
+      El botón «Registrar y generar QR» debe ser la acción principal del formulario.
+      El código M-8 debe mostrarse en tamaño grande y alto contraste.
+      La pantalla de entrega debe permitir resolver la operación desde un único lugar, sin navegar por varias pantallas.
+      Los paquetes atrasados deben tener una señal visual claramente distinguible.
+      Las acciones irreversibles como «Marcar Entregado» deben requerir confirmación.
+
+
+
+12. Requerimientos no funcionales
+    ID             Categoría            Requisito
+    RNF-01         Usabilidad           La interfaz deberá ser simple, con textos claros y mínima cantidad de pasos.
+                                        Las consultas normales del listado y búsqueda deberían responder en un tiempo objetivo menor a 2
+    RNF-02         Rendimiento
+                                        segundos bajo carga operativa normal.
+                                        El sistema debería permitir operación continua durante el horario del punto de entrega, con
+    RNF-03         Disponibilidad
+                                        mecanismo de recuperación ante fallos.
+    RNF-04         Seguridad            Contraseñas con hash seguro; control de sesiones; autorización por roles; protección de endpoints.
+    RNF-05         Privacidad           Minimizar datos personales en QR y pantallas públicas; restringir acceso a información sensible.
+    RNF-06         Auditoría            Registrar eventos relevantes con fecha/hora, usuario y detalle.
+    RNF-07         Respaldo             Copias de seguridad periódicas de la base de datos y procedimiento de restauración.
+    RNF-08         Escalabilidad        Arquitectura que permita múltiples operadores y múltiples puntos de entrega en una futura versión.
+    RNF-09         Compatibilidad       Diseño responsive o adaptable a PC, laptop y tablet; cámara disponible para lectura de QR.
+    RNF-10         Mantenibilidad       Código modular, documentado, con pruebas automatizadas para reglas de negocio críticas.
+
+
+
+
+13. Reglas de negocio
+RN-01 — Cada paquete debe tener un ID interno único.
+RN-02 — Un paquete nuevo inicia en estado «Pendiente».
+RN-03 — Solo un paquete pendiente puede pasar normalmente a «Entregado».
+RN-04 — La fecha/hora de recepción se genera automáticamente y no debe ser editable por un operador sin permiso
+especial.
+RN-05 — La numeración de lista debe seguir un criterio consistente y configurable (reinicio diario, mensual o
+secuencia continua).
+RN-06 — El código visible se genera automáticamente y no debe ser digitado manualmente por el operador.
+RN-07 — El QR identifica al paquete, pero no debe exponer información personal innecesaria.
+
+                                    Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                        DeUna | Especificación de Requerimientos de Software
+
+RN-08 — La comisión por atraso solo se aplica cuando el retiro supera el plazo configurado.
+RN-09 — El monto total cobrado debe quedar almacenado con el detalle de tarifa base y comisión.
+RN-10 — Todo paquete entregado debe conservar historial y no debe eliminarse físicamente; se recomienda baja
+lógica.
+RN-11 — Las excepciones de entrega deben quedar registradas en observaciones/historial.
+RN-12 — Los cambios de tarifas deben aplicar a nuevos retiros según la política definida, sin alterar retroactivamente
+pagos ya cerrados.
+
+
+
+
+                                 Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                             DeUna | Especificación de Requerimientos de Software
+
+14. Criterios de aceptación
+    ID           Prueba                           Resultado esperado
+                                                  Al guardar un paquete válido, el sistema crea un registro y muestra número, código M-N y
+    CA-01        Crear paquete
+                                                  QR.
+    CA-02        Código                           Para un comprador llamado «Maria Caceres» y número 8, el sistema genera «M-8».
+                                                  Escanear el QR permite localizar el paquete correcto sin mostrar datos sensibles
+    CA-03        QR
+                                                  innecesarios.
+    CA-04        Estado inicial                   Todo paquete recién registrado aparece como «Pendiente».
+    CA-05        Búsqueda                         El operador puede localizar un paquete mediante código o nombre del comprador.
+    CA-06        Plazo                            El sistema determina correctamente si han transcurrido más de 7 × 24 horas.
+    CA-07        Comisión                         Cuando corresponde atraso, el sistema agrega automáticamente la comisión configurada.
+    CA-08        Pago                             No se puede cerrar la entrega sin registrar el total cobrado y medio de pago.
+    CA-09        Entrega                          Al confirmar el retiro, el estado cambia a «Entregado» y queda fecha/hora y operador.
+    CA-10        Auditoría                        El historial permite saber cuándo y quién realizó el registro y la entrega.
+    CA-11        Reporte                          El administrador puede obtener listado de pendientes, entregados y paquetes con atraso.
+    CA-12        Seguridad                        Un operador no puede modificar configuración exclusiva del administrador.
+
+
+
+
+15. Casos especiales y validaciones
+        Se intenta registrar un paquete sin nombre del comprador: impedir el guardado y mostrar mensaje claro.
+        El comprador tiene un nombre compuesto o tildes: normalizar correctamente la inicial.
+        Dos paquetes tienen el mismo comprador: ambos deben diferenciarse por número, código e ID/QR.
+        Un tercero retira el paquete: debe existir un autorizado registrado o una excepción documentada según la política
+         interna.
+        El QR está dañado: el código M-N debe permitir búsqueda manual.
+        El paquete ya fue entregado y se intenta entregarlo nuevamente: bloquear la operación normal.
+        El operador introduce un código inexistente: mostrar «Paquete no encontrado» sin revelar información adicional.
+        No existe conexión a internet: definir explícitamente si el sistema funcionará sin conexión. Para MVP se
+         recomienda requerir conexión y mostrar un estado de conectividad.
+        El monto cobrado difiere del calculado: pedir permiso especial y registrar el motivo en auditoría.
+        El plazo de 7 días cambia en configuración: se debe definir desde qué momento afecta la nueva regla; se
+         recomienda no modificar retrospectivamente retiros cerrados.
+
+
+
+16. Reportes y métricas sugeridas
+    Reporte                              Indicadores
+    Paquetes del día                     Recibidos, entregados, pendientes y atrasados.
+    Paquetes pendientes                  Código, comprador, vendedor, días, ubicación, tarifa estimada.
+    Paquetes entregados                  Fecha de recepción, fecha de entrega, días de permanencia, operador.
+    Ingresos                             Tarifa base, comisiones, total cobrado y medio de pago.
+    Rendimiento operativo                Cantidad de paquetes por día, semana o mes; tiempo promedio de permanencia.
+    Vendedores frecuentes                Número de paquetes por vendedor y monto generado, si la política comercial lo requiere.
+
+
+
+
+17. Notificaciones y extensiones futuras
+No son imprescindibles para el MVP, pero el diseño debería permitir incorporarlas sin rehacer el sistema:
+        Envío automático de QR al vendedor por WhatsApp/SMS/email.
+        Notificación al comprador cuando el paquete es recibido.
+        Recordatorio antes de cumplir 7 días.
+        Aviso de vencimiento o aplicación de comisión.
+
+                                      Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                            DeUna | Especificación de Requerimientos de Software
+
+      Consulta pública mediante un enlace seguro asociado al QR.
+      Aplicación móvil para operador con cámara integrada.
+      Múltiples puntos DeUna con inventario/ubicación de estanterías por sucursal.
+      Integración con pagos QR, POS o billeteras electrónicas.
+
+
+
+18. Propuesta de desarrollo por fases
+    Fase                    Contenido                                                                       Salida esperada
+                            Login, usuarios, vendedor, comprador, paquete, código M-N, QR, listado,
+                                                                                                            Sistema operativo mínimo para
+    Fase 1 – MVP            búsqueda, estado Pendiente/Entregado, regla 7 días, pago y auditoría
+                                                                                                            un punto DeUna.
+                            básica.
+                            Dashboard, reportes, impresión de etiquetas, filtros avanzados, ubicación       Mayor velocidad y control
+    Fase 2 – Operación
+                            física del paquete, backups automatizados.                                      operativo.
+                                                                                                            Menos llamadas y consultas
+    Fase 3 – Comunicación   WhatsApp/SMS/email, recordatorios, enlace de consulta para comprador.
+                                                                                                            manuales.
+                                                                                                            Plataforma preparada para
+    Fase 4 – Escalamiento   Multi-sucursal, app móvil, roles avanzados, APIs, integraciones de pago.
+                                                                                                            crecimiento.
+
+
+
+
+19. Decisiones que deben aprobarse antes de programar
+Para evitar retrabajos, el equipo de desarrollo debería cerrar estas decisiones durante la etapa de análisis:
+      ¿La numeración «8» se reinicia diariamente, mensualmente o nunca?
+      ¿El código M-8 debe ser único en todo el sistema o solo dentro de la numeración activa?
+      ¿Cuál será la tarifa base del servicio por paquete?
+      ¿La comisión por superar 7 días será un monto fijo o un porcentaje?
+      ¿Se cobrará por paquete, por día adicional o una sola vez al superar el plazo?
+      ¿Qué documento o mecanismo se usará para validar que la persona que recoge está autorizada?
+      ¿Se debe almacenar descripción, foto o ubicación física del paquete?
+      ¿Se permitirá funcionamiento sin internet?
+      ¿Cuál será el medio de pago preferido y qué comprobante se entregará?
+      ¿Se enviará el QR automáticamente al comprador o el vendedor lo compartirá manualmente?
+      ¿Qué política de retención y privacidad aplicará a los datos personales?
+
+
+
+20. Definición de terminado (Definition of Done)
+      Los requerimientos funcionales del MVP están implementados y probados.
+      Existe una base de datos consistente y respaldable.
+      Los roles y permisos fueron verificados.
+      La generación de código y QR fue probada con nombres reales y duplicados.
+      La regla de 7 días tiene pruebas para los límites exactos y casos atrasados.
+      El flujo completo recepción → pendiente → pago → entrega funciona de extremo a extremo.
+      Existe registro de auditoría para operaciones críticas.
+      El sistema cuenta con manual mínimo de uso para operadores.
+      QA valida los criterios de aceptación sin defectos críticos abiertos.
+      La solución fue desplegada en un entorno de producción o piloto y se verificó la recuperación desde respaldo.
+
+
+
+
+                                     Documento de referencia para análisis, diseño, desarrollo y pruebas
+                                                                                        DeUna | Especificación de Requerimientos de Software
+
+21. Conclusión
+La solución propuesta para DeUna debe centrarse en un flujo operativo rápido y controlado: registrar el paquete una
+sola vez, identificarlo mediante un código corto y un QR, custodiarlo bajo un estado «Pendiente», aplicar
+automáticamente la regla de permanencia de 7 días, registrar el pago al momento del retiro y cerrar la operación como
+«Entregado».
+Este documento constituye una base de SRS para que un equipo de software pueda elaborar historias de usuario,
+diagramas UML/BPMN, modelo entidad-relación, arquitectura, prototipos de interfaz, estimación de esfuerzo, plan de
+pruebas y backlog del MVP.
+
+
+
+Anexo A. Historia de usuario principal
+ Historia de usuario
+ Como operador de DeUna, quiero registrar un paquete y generar automáticamente un código M-N y un QR para
+ poder identificarlo, custodiarlo, cobrar el servicio al momento del retiro y marcarlo como entregado de forma
+ rápida y trazable.
+
+
+
+
+Anexo B. Ejemplo completo
+ Campo                                        Ejemplo
+ Número de lista                              8
+ Comprador                                    Maria Caceres
+ Código                                       M-8
+ Celular del vendedor                         70000000
+ Fecha de recepción                           01/09/2026 15:30
+ Persona que recoge                           Maria Caceres
+ Estado inicial                               Pendiente
+ Plazo                                        Hasta 08/09/2026 15:30
+ Estado al retiro                             Entregado
+ Pago                                         Tarifa base + comisión si retiro posterior al plazo
+
+
+
+
+                                 Documento de referencia para análisis, diseño, desarrollo y pruebas
+
