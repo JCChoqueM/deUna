@@ -6,6 +6,14 @@
 class Controller
 {
     /**
+     * Base controller constructor
+     */
+    public function __construct()
+    {
+        // Ensure database is available
+        Database::getInstance();
+    }
+    /**
      * Load a model
      */
     protected function model(string $name): object

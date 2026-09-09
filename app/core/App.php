@@ -11,15 +11,65 @@ class App
     protected string $methodName = 'index';
     protected array $params = [];
 
+    /**
+     * Special route aliases (regex => [Controller, Method, ParamOffset])
+     * ParamOffset: index in split URL array where param begins
+     */
+    protected array $routeMap = [
+        // /login → AuthController@login
+        '#^login$#' => ['Auth', 'login', 0],
+        // /logout → AuthController@logout
+        '#^logout$#' => ['Auth', 'logout', 0],
+        // /register → AuthController@register
+        '#^register$#' => ['Auth', 'register', 0],
+        // /qr-code/{token}
+        '#^qr-code/(.+)$#' => ['Paquete', 'qrCode', 1],
+        // /entrega/{token}
+        '#^entrega/(.+)$#' => ['Paquete', 'entregaPublica', 1],
+        // /api/paquete
+        '#^api/paquete$#' => ['Paquete', 'apiBuscar', 0],
+        // /api/buscar
+        '#^api/buscar$#' => ['Paquete', 'apiBuscarLista', 0],
+    ];
+
+    /**
+     * Controller name aliases (URL segment → controller class prefix)
+     */
+    protected array $controllerAliases = [
+        'paquetes' => 'Paquete',
+        'usuarios' => 'Usuario',
+        'reportes' => 'Reporte',
+        'login' => 'Auth',
+        'logout' => 'Auth',
+        'register' => 'Auth',
+    ];
+
     public function __construct()
     {
         // Parse the request URL
         $url = $this->parseUrl();
 
+        // Check for special routes
+        $path = implode('/', array_filter($url));
+        foreach ($this->routeMap as $pattern => $route) {
+            if (preg_match($pattern, $path, $matches)) {
+                $this->controllerName = $route[0] . 'Controller';
+                $this->methodName = $route[1];
+                $this->params = $route[2] > 0 ? [$matches[$route[2]]] : [];
+                $this->dispatch();
+                return;
+            }
+        }
+
         // Determine controller
         if (isset($url[0]) && !empty($url[0])) {
             $controllerSegment = ucfirst(strtolower($url[0]));
-            $controllerFile = dirname(__DIR__) . '/app/controllers/' . $controllerSegment . 'Controller.php';
+            // Check for alias (e.g., paquetes → Paquete)
+            $lowerSegment = strtolower($url[0]);
+            if (isset($this->controllerAliases[$lowerSegment])) {
+                $controllerSegment = $this->controllerAliases[$lowerSegment];
+            }
+            $controllerFile = dirname(__DIR__) . '/controllers/' . $controllerSegment . 'Controller.php';
             if (file_exists($controllerFile)) {
                 $this->controllerName = $controllerSegment . 'Controller';
             }
@@ -68,7 +118,9 @@ class App
 
         // Check authentication for non-auth controllers
         $publicControllers = ['Auth'];
-        $isPublic = in_array(str_replace('Controller', '', $this->controllerName), $publicControllers);
+        $publicActions = ['PaqueteController@qrCode', 'PaqueteController@entregaPublica', 'PaqueteController@apiBuscar', 'PaqueteController@apiBuscarLista'];
+        $isPublic = in_array(str_replace('Controller', '', $this->controllerName), $publicControllers)
+            || in_array($this->controllerName . '@' . $this->methodName, $publicActions);
 
         if (!$isPublic && !Auth::canAccess()) {
             header('Location: ' . BASE_URL . 'login');

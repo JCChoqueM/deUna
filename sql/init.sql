@@ -76,6 +76,7 @@ CREATE TABLE paquetes (
     observaciones TEXT,
     descripcion TEXT,
     monto_base REAL DEFAULT 0,
+    fecha_actualizacion TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (vendedor_id) REFERENCES vendedores(id),
     FOREIGN KEY (comprador_id) REFERENCES compradores(id),
     FOREIGN KEY (autorizado_id) REFERENCES autorizados(id)

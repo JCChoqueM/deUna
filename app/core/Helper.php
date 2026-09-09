@@ -179,6 +179,8 @@ class Helper
      */
     public static function getPackageUrl(string $qrToken): string
     {
-        return $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/entrega/' . $qrToken;
+        $scheme = $_SERVER['REQUEST_SCHEME'] ?? ($_SERVER['HTTPS'] ?? '') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        return $scheme . '://' . $host . '/entrega/' . $qrToken;
     }
 }

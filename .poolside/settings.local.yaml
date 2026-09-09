@@ -20,3 +20,29 @@ tools:
             - tail *
             - timeout 60 composer require *
             - timeout 10 curl *
+            - timeout 15 curl *
+            - which npm *
+            - npm list *
+            - timeout 30 npm install *
+            - node *
+            - timeout 30 npx browserify *
+            - cp *
+            - timeout 30 npx terser *
+            - '[ ! *'
+            - cut *
+            - pip3 install *
+            - apt list *
+            - which zbarimg
+            - dpkg *
+            - sleep 2
+            - curl *
+            - kill *
+            - sleep 1
+            - sleep 3
+            - lsof *
+            - ps aux
+            - rm *
+            - sleep 4
+            - sleep 5
+            - sqlite3 *
+            - xxd

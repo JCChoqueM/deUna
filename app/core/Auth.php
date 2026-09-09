@@ -72,4 +72,12 @@ class Auth
     {
         return self::isAuthenticated();
     }
+
+    /**
+     * Get current user's display name
+     */
+    public static function getUserName(): string
+    {
+        return Session::get('user_name', 'Usuario');
+    }
 }

@@ -24,20 +24,39 @@ class Database
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::SQLITE_ATTR_FOREIGN_KEYS => true,
             ]);
+            // Enable foreign key support for SQLite
+            self::$instance->exec('PRAGMA foreign_keys = ON');
         }
         return self::$instance;
     }
 
     /**
-     * Run database migrations if tables don't exist
+     * Run database migrations only if tables don't exist yet
      */
     public static function migrate(): void
     {
         $pdo = self::getInstance();
+        
+        // Check if tables already exist (skip migration if they do)
+        $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios' LIMIT 1");
+        if ($stmt->fetchColumn()) {
+            return; // Tables already exist
+        }
+        
+        $pdo->exec('PRAGMA foreign_keys = OFF');
+        
         $sql = file_get_contents(dirname(__DIR__, 2) . '/sql/init.sql');
-        $pdo->exec($sql);
+        
+        // Split SQL into individual statements and execute one by one
+        $statements = array_filter(array_map('trim', explode(';', $sql)));
+        foreach ($statements as $statement) {
+            if (!empty($statement)) {
+                $pdo->exec($statement);
+            }
+        }
+        
+        $pdo->exec('PRAGMA foreign_keys = ON');
     }
 
     /**

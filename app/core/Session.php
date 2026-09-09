@@ -12,6 +12,12 @@ class Session
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_name(SESSION_NAME);
+            // Ensure writable session save path
+            $savePath = session_save_path();
+            if (empty($savePath) || !is_writable($savePath)) {
+                $savePath = sys_get_temp_dir();
+            }
+            session_save_path($savePath);
             ini_set('session.gc_maxlifetime', SESSION_TIMEOUT);
             session_start();
         }
@@ -59,8 +65,17 @@ class Session
     public static function destroy(): void
     {
         self::start();
+        $_SESSION = [];
         session_destroy();
         session_write_close();
+        // Clear session cookie
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 3600,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
     }
 
     /**
@@ -69,7 +84,7 @@ class Session
     public static function flash(string $key, string $message): void
     {
         self::start();
-        $_SESSION['_flash'][$key] = $message;
+        $_SESSION['_flash'][$key] = ['type' => $key, 'message' => $message];
     }
 
     /**
