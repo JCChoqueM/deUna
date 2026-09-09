@@ -921,6 +921,26 @@ php -l app/core/App.php
 - Las contraseñas se almacenan con `password_hash()` (bcrypt/argon2)
 - CSRF tokens se renderizan en todos los formularios via `Helper::csrfToken()`
 
+### Script de despliegue automático (Domcloud)
+
+```bash
+# Generar paquete listo para Domcloud
+python3 scripts/deploy_domcloud.py
+
+# Ver vista previa sin crear archivos
+python3 scripts/deploy_domcloud.py --dry-run
+
+# Especificar directorio de destino
+python3 scripts/deploy_domcloud.py --target /home/tu_usuario
+```
+
+Genera automáticamente:
+- `public_html/` — document root con archivos públicos adaptados
+- `deuna_app/` — código de aplicación con paths configurados
+- `deploy_checklist.txt` — lista de verificación
+
+Ver documentación completa en `docs/DESpliegue_Domcloud.md`.
+
 ---
 
 ## Despliegue a Producción
